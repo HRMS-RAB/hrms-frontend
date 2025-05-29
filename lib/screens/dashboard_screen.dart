@@ -6,13 +6,16 @@ import 'login_screen.dart';
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
 
-  Widget _buildCard(String title, IconData icon, VoidCallback onTap) {
+  Widget _buildCard(
+      {required String title,
+      required IconData icon,
+      required VoidCallback onTap}) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 4,
-      margin: const EdgeInsets.all(12),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
-        leading: Icon(icon, size: 32),
+        leading: Icon(icon, size: 30),
         title: Text(title, style: const TextStyle(fontSize: 18)),
         onTap: onTap,
       ),
@@ -21,15 +24,13 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final auth = Provider.of<AuthService>(context);
+    final auth = Provider.of<AuthService>(context, listen: true);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('HRMS Dashboard'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
             onPressed: () {
               auth.logout();
               Navigator.pushReplacement(
@@ -37,51 +38,73 @@ class DashboardScreen extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => const LoginScreen()),
               );
             },
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
           )
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          const SizedBox(height: 20),
-          const Text(
-            '🎯 Quick Access',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: ListView(
+          children: [
+            const Text('🎯 Quick Access',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
 
-          const SizedBox(height: 16),
+            // -------- ADMIN / HR_ADMIN ------------
+            if (auth.hasRole('ADMIN') || auth.hasRole('HR_ADMIN')) ...[
+              _buildCard(
+                  title: 'Manage Employees',
+                  icon: Icons.people,
+                  onTap: () {
+                    // TODO: navigate to employee list
+                  }),
+              _buildCard(
+                  title: 'System Settings',
+                  icon: Icons.settings,
+                  onTap: () {
+                    // TODO: navigate to settings
+                  }),
+            ],
 
-          if (auth.hasRole('ADMIN') || auth.hasRole('HR_MANAGER'))
-            _buildCard('Manage Employees', Icons.people, () {
-              // Navigate to employee list screen
-            }),
+            // -------- HR_MANAGER -----------------
+            if (auth.hasRole('HR_MANAGER'))
+              _buildCard(
+                  title: 'Recruitment',
+                  icon: Icons.assignment_ind,
+                  onTap: () {
+                    // TODO: navigate to recruitment page
+                  }),
 
-          if (auth.hasRole('ADMIN'))
-            _buildCard('System Settings', Icons.settings, () {
-              // Navigate to admin settings
-            }),
+            // -------- DEPT_HEAD ------------------
+            if (auth.hasRole('DEPT_HEAD'))
+              _buildCard(
+                  title: 'Team Overview',
+                  icon: Icons.group,
+                  onTap: () {
+                    // TODO: navigate to team dashboard
+                  }),
 
-          if (auth.hasRole('EMPLOYEE'))
-            _buildCard('My Profile', Icons.person, () {
-              // Navigate to personal profile page
-            }),
+            // -------- EMPLOYEE -------------------
+            if (auth.hasRole('EMPLOYEE'))
+              _buildCard(
+                  title: 'My Profile',
+                  icon: Icons.person,
+                  onTap: () {
+                    // TODO: navigate to profile
+                  }),
 
-          if (auth.hasRole('HR_MANAGER'))
-            _buildCard('Recruitment', Icons.assignment_ind, () {
-              // Navigate to recruitment page
-            }),
-
-          if (auth.roles.isEmpty)
-            const Padding(
-              padding: EdgeInsets.only(top: 32),
-              child: Center(
-                child: Text(
-                  'No permissions assigned. Contact admin.',
-                  style: TextStyle(color: Colors.red),
+            // -------- Fall-back ------------------
+            if (auth.roles.isEmpty)
+              const Padding(
+                padding: EdgeInsets.only(top: 32),
+                child: Center(
+                  child: Text('No permissions assigned. Contact admin.',
+                      style: TextStyle(color: Colors.red)),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
