@@ -9,11 +9,12 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # ─── App packages ────────────────────────────────────────
-  provider: ^6.1.2
+  # ─── App packages ─────────────────
+  provider: ^6.1.2           # keep the newer provider version
   http: ^1.2.1
   flutter_spinkit: ^5.2.0
   google_fonts: ^6.2.1
+  shared_preferences: ^2.2.3   # web + mobile compatible  ✅
 
 dev_dependencies:
   flutter_test:
